@@ -29,7 +29,7 @@ Let's take Python day for example. Open developer tools in your browser and insp
 
 Bingo, it seems that all we need to do is to fetch all `<a href="...">` links where `href` is a string that starts with `/2025/talks`. Then, we can get the text in that href (talk title), and find the closest `<span>` afterwards, which contains the speaker name. Let's get to coding.
 
-## Step 4 - coding the MVP
+## Step 4 - coding
 ### 4.1 Modifying the input schema
 Let's head to `.actor/input_schema.json` and modify the `prefill` for the `start_urls` to `https://pycon.lt/day/python`. While on it, let's also change the `title` of the schema to something more reasonable.
 
@@ -39,3 +39,44 @@ Let's head to `.actor/input_schema.json` and modify the `prefill` for the `start
 In `.actor/actor.json`, let's just quickly change the `name`, `title` and `description` to something more sensible.
 
 ![Modifying actor.json](images/4b_modifying_actor_json.png)
+
+### 4.3 Strapping code of fluff
+Head to `main.py` and remove all unnecessary comments and other things. While on it, feel free to remove the default input URL fallback, as the input is required and will be always present. You can also remove `max_requests_per_crawl=50,` as we won't be using it. Finally, in `request_handler` remove everything apart from printing the `context.request.url`.
+
+```(python)
+from __future__ import annotations
+
+from apify import Actor
+from crawlee.crawlers import BeautifulSoupCrawler, BeautifulSoupCrawlingContext
+
+
+async def main() -> None:
+    async with Actor:
+        actor_input = await Actor.get_input() or {}
+        start_urls = [
+            url.get('url')
+            for url in actor_input.get('start_urls', [])
+        ]
+
+        if not start_urls:
+            Actor.log.info('No start URLs specified in Actor input, exiting...')
+            await Actor.exit()
+
+        crawler = BeautifulSoupCrawler()
+
+        @crawler.router.default_handler
+        async def request_handler(context: BeautifulSoupCrawlingContext) -> None:
+            url = context.request.url
+            Actor.log.info(f'Scraping {url}...')
+
+        await crawler.run(start_urls)
+```
+
+Now you are ready to try out your Actor!
+
+### 4.4 Trying out the very simple version
+Before running the Actor, you need to build it, to create an image that will later be executed upon runtime. Once, you Actor is built, start it. Check the `Input` tab before, to make sure you have correctly pre-populated input with they Python day URL. This is prefilled from the `prefill` property you added in `input_schema.json`.
+
+Your current implementation is executing `request_handler` for each `start_url` (by default single one for the Python day). Then, it's simply printing the URL to the log. You might see the log duplicated, as one is appended with extra system message.
+
+![Seeing first log](images/4d_seeing_first_log.png)
