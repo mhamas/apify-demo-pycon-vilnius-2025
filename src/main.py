@@ -57,7 +57,7 @@ async def main() -> None:
                         dataset = await Actor.open_dataset(id=call_result.default_dataset_id, force_cloud=True)
                         async for page in dataset.iterate_items():
                             for result in page['organicResults']:
-                                if 'linkedin.com/in' in result.get('url', ''):
+                                if not linkedin_url and 'linkedin.com/in' in result.get('url', ''):
                                     linkedin_url = result.get('url')
 
                     Actor.log.info(f'Speaker: {speaker_name}, Talk: {talk_title}, LinkedIn: {linkedin_url}, Day: {day}')
