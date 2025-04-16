@@ -43,7 +43,7 @@ In `.actor/actor.json`, let's just quickly change the `name`, `title` and `descr
 ### 4.3 Strapping code of fluff
 Head to `main.py` and remove all unnecessary comments and other things. While on it, feel free to remove the default input URL fallback, as the input is required and will be always present. You can also remove `max_requests_per_crawl=50,` as we won't be using it. Finally, in `request_handler` remove everything apart from printing the `context.request.url`.
 
-```(python)
+```python
 from __future__ import annotations
 
 from apify import Actor
@@ -80,3 +80,49 @@ Before running the Actor, you need to build it, to create an image that will lat
 Your current implementation is executing `request_handler` for each `start_url` (by default single one for the Python day). Then, it's simply printing the URL to the log. You might see the log duplicated, as one is appended with extra system message.
 
 ![Seeing first log](images/4d_seeing_first_log.png)
+
+### 4.5 Extracting speakers and their talk titles
+In this part, let's modify the `request_handler` function to actually extract the the speaker name and talk title from the page, into `spaker_name` and `talk_title` variables. Let's also parse out which `day` this is from the url (python day in our example). Feel free to use BeautifulSoup docs, Google, or any LLM tool you fancy.
+
+Add the end of the handler, add following snippet to push each datapoint into the dataset (kind of a table associated with the run). 
+```python
+await Actor.push_data({
+    'speaker_name': speaker_name,
+    'talk_title': talk_title,
+    'day': day
+})
+```
+
+For completness, the code is
+```python
+@crawler.router.default_handler
+async def request_handler(context: BeautifulSoupCrawlingContext) -> None:
+    url = context.request.url
+    day = url.split('/')[-1]
+    Actor.log.info(f'Scraping {url}...')
+    soup = context.soup
+    talk_links = soup.find_all('a', href=lambda x: x and x.startswith('/2025/talks'))
+
+    for link in talk_links:
+        talk_title = link.text.strip()
+        speaker_name = None
+
+        parent_div = link.find_parent('div')
+        if parent_div:
+            speaker_spans = parent_div.find_all('span')
+            if speaker_spans:
+                speaker_span = speaker_spans[-1]
+                speaker_name = speaker_span.text.strip()
+
+        Actor.log.info(f'Speaker: {speaker_name}, Talk: {talk_title}, Day: {day}')
+
+        await Actor.push_data({
+            'speaker_name': speaker_name,
+            'talk_title': talk_title,
+            'day': day,
+        })
+```
+
+Let's rebuild and restart the Actor in the Console. When you head to the `Output tab`, you should see table with the speakers for Python day!
+
+![Speakers table](images/4e_speakers_table.png)

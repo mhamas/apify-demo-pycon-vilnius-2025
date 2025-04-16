@@ -21,6 +21,7 @@ async def main() -> None:
         @crawler.router.default_handler
         async def request_handler(context: BeautifulSoupCrawlingContext) -> None:
             url = context.request.url
+            day = url.split('/')[-1]
             Actor.log.info(f'Scraping {url}...')
             soup = context.soup
             talk_links = soup.find_all('a', href=lambda x: x and x.startswith('/2025/talks'))
@@ -36,11 +37,12 @@ async def main() -> None:
                         speaker_span = speaker_spans[-1]
                         speaker_name = speaker_span.text.strip()
 
-                Actor.log.info(f'Speaker: {speaker_name}, Talk: {talk_title}')
+                Actor.log.info(f'Speaker: {speaker_name}, Talk: {talk_title}, Day: {day}')
 
                 await Actor.push_data({
                     'speaker_name': speaker_name,
                     'talk_title': talk_title,
+                    'day': day,
                 })
 
         await crawler.run(start_urls)
