@@ -1,5 +1,5 @@
 {
-    "title": "Python Crawlee BeautifulSoup Scraper",
+    "title": "Scraping PyCon Vilnius Speakers",
     "type": "object",
     "schemaVersion": 1,
     "properties": {
@@ -8,7 +8,7 @@
             "type": "array",
             "description": "URLs to start with",
             "prefill": [
-                { "url": "https://apify.com" }
+                { "url": "https://pycon.lt/day/python" }
             ],
             "editor": "requestListSources"
         }

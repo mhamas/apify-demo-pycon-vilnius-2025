@@ -1,68 +1,41 @@
-## Python Crawlee with BeautifulSoup template
+# Apify Demo - PyCon Vilnius 2025
 
-A template for [web scraping](https://apify.com/web-scraping) data from websites starting from provided URLs using Python. The starting URLs are passed through the Actor's input schema, defined by the [input schema](https://docs.apify.com/platform/actors/development/input-schema). The template uses [Crawlee for Python](https://crawlee.dev/python) for efficient web crawling,  handling each request through a user-defined handler that uses [Beautiful Soup](https://pypi.org/project/beautifulsoup4/) to extract data from the page. Enqueued URLs are managed in the [request queue](https://crawlee.dev/python/api/class/RequestQueue), and the extracted data is saved in a [dataset](https://crawlee.dev/python/api/class/Dataset) for easy access.
+This is a demo Actor used during the [workshop](https://pycon.lt/talks/LAG8AJ) in Vilnius in 2025. It showcases how to implement and monetize a simple Apify Actor using the Beautiful Soup and Crawlee template from Apify. The Actor scrapes the names of speakers at the conference, along with the titles of their talks. The intended use case is to quickly create a database of speakers for potentially connecting with them in the future.
 
-## Included features
+## Step 1 - create Apify Account
+Head to [Apify Console](https://console.apify.com/sign-up) and create an account, or login with Google / Github.
 
-- **[Apify SDK](https://docs.apify.com/sdk/python/)** - a toolkit for building Apify [Actors](https://apify.com/actors) in Python.
-- **[Crawlee for Python](https://crawlee.dev/python/)** - a web scraping and browser automation library.
-- **[Input schema](https://docs.apify.com/platform/actors/development/input-schema)** - define and validate a schema for your Actor's input.
-- **[Request queue](https://crawlee.dev/python/api/class/RequestQueue)** - manage the URLs you want to scrape in a queue.
-- **[Dataset](https://crawlee.dev/python/api/class/Dataset)** - store and access structured data extracted from web pages.
-- **[Beautiful Soup](https://pypi.org/project/beautifulsoup4/)** - a library for pulling data out of HTML and XML files.
+![Sign up](images/1_signup.png)
 
-## Resources
+## Step 2 - create a new Actor using template
+Head to [Actors > Development](https://console.apify.com/actors/development/my-actors) and cick `Develop new`.
 
-- [Video introduction to Python SDK](https://www.youtube.com/watch?v=C8DmvJQS3jk)
-- [Webinar introducing to Crawlee for Python](https://www.youtube.com/live/ip8Ii0eLfRY)
-- [Apify Python SDK documentation](https://docs.apify.com/sdk/python/)
-- [Crawlee for Python documentation](https://crawlee.dev/python/docs/quick-start)
-- [Python tutorials in Academy](https://docs.apify.com/academy/python)
-- [Integration with Make, GitHub, Zapier, Google Drive, and other apps](https://apify.com/integrations)
-- [Video guide on getting scraped data using Apify API](https://www.youtube.com/watch?v=ViYYDHSBAKM)
-- A short guide on how to build web scrapers using code templates:
+![Develop new Actor](images/2a_develop_new.png)
 
-[web scraper template](https://www.youtube.com/watch?v=u-i-Korzf8w)
+Click on `View all templates`, find `Crawlee + BeautifulSoup` template, and install it.
 
+![View all templates](images/2b_view_all_templates.png)
 
-## Getting started
+![Find template](images/2c_find_template.png)
 
-For complete information [see this article](https://docs.apify.com/platform/actors/development#build-actor-locally). To run the actor use the following command:
+![Use template](images/2d_use_template.png)
 
-```bash
-apify run
-```
+## Step 3 - inspecting the target website
+Go to [pycon.lt](https://pycon.lt/) and inspect the pages dedicated for the 3 days of the conference ([Python day](https://pycon.lt/day/python), [Data day](https://pycon.lt/day/data), [AI day](https://pycon.lt/day/ai)).
 
-## Deploy to Apify
+Let's take Python day for example. Open developer tools in your browser and inspect the HTML structure of the page.
 
-### Connect Git repository to Apify
+![Inspect Python day](images/3_inspect_page_python_day.png)
 
-If you've created a Git repository for the project, you can easily connect to Apify:
+Bingo, it seems that all we need to do is to fetch all `<a href="...">` links where `href` is a string that starts with `/2025/talks`. Then, we can get the text in that href (talk title), and find the closest `<span>` afterwards, which contains the speaker name. Let's get to coding.
 
-1. Go to [Actor creation page](https://console.apify.com/actors/new)
-2. Click on **Link Git Repository** button
+## Step 4 - coding the MVP
+### 4.1 Modifying the input schema
+Let's head to `.actor/input_schema.json` and modify the `prefill` for the `start_urls` to `https://pycon.lt/day/python`. While on it, let's also change the `title` of the schema to something more reasonable.
 
-### Push project on your local machine to Apify
+![Modifying input schema](images/4a_modifying_input_schema.png)
 
-You can also deploy the project on your local machine to Apify without the need for the Git repository.
+### 4.2 Modifying actor.json
+In `.actor/actor.json`, let's just quickly change the `name`, `title` and `description` to something more sensible.
 
-1. Log in to Apify. You will need to provide your [Apify API Token](https://console.apify.com/account/integrations) to complete this action.
-
-    ```bash
-    apify login
-    ```
-
-2. Deploy your Actor. This command will deploy and build the Actor on the Apify Platform. You can find your newly created Actor under [Actors -> My Actors](https://console.apify.com/actors?tab=my).
-
-    ```bash
-    apify push
-    ```
-
-## Documentation reference
-
-To learn more about Apify and Actors, take a look at the following resources:
-
-- [Apify SDK for JavaScript documentation](https://docs.apify.com/sdk/js)
-- [Apify SDK for Python documentation](https://docs.apify.com/sdk/python)
-- [Apify Platform documentation](https://docs.apify.com/platform)
-- [Join our developer community on Discord](https://discord.com/invite/jyEM2PRvMU)
+![Modifying actor.json](images/4b_modifying_actor_json.png)

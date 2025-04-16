@@ -1,8 +1,8 @@
 {
 	"actorSpecification": 1,
 	"name": "apify-demo-pycon-vilnius-2025",
-	"title": "Getting started with Python Crawlee and BeautifulSoup",
-	"description": "Scrapes titles of websites using Crawlee and BeautifulSoup.",
+	"title": "Scraping PyCon Vilnius 2025 Speakers",
+	"description": "Actor that scrapes the names of speakers at the PyCon Vilnius 2025 conference.",
 	"version": "0.0",
 	"buildTag": "latest",
 	"meta": {
