@@ -24,7 +24,10 @@ async def main() -> None:
             day = url.split('/')[-1]
             Actor.log.info(f'Scraping {url}...')
             soup = context.soup
-            talk_links = soup.find_all('a', href=lambda x: x and x.startswith('/2025/talks'))
+            talk_links = soup.find_all(
+                'a',
+                href=lambda x: x and (x.startswith('/2025/talks') or x.startswith('/talks/'))
+            )
 
             for link in talk_links:
                 talk_title = link.text.strip()

@@ -126,3 +126,27 @@ async def request_handler(context: BeautifulSoupCrawlingContext) -> None:
 Let's rebuild and restart the Actor in the Console. When you head to the `Output tab`, you should see table with the speakers for Python day!
 
 ![Speakers table](images/4e_speakers_table.png)
+
+### 4.5 Trying out for all 3 days
+Head to `Input` section of your Actor, and add also URLs for Data day (https://pycon.lt/day/data) and AI day (https://pycon.lt/day/ai).
+
+![All three days](images/4f_trying_all_three_days.png)
+
+When you run the Actor, head to the `Output` tab. You might see that the speakers for the Data day are missing.
+
+> Exercise: figure out why and change the code to include them as well.
+
+**Solution**
+
+For some reason, `<a href='...'>`on Data day page have `href` links that don't start with `'/2025/talks'`, but only `/talks`.
+
+
+![Data day HTML](images/4g_data_day_data_inconsistency.png)
+
+We need to modify the `startswith()` condition to handle both cases. Let's update the relevant line to
+```python
+talk_links = soup.find_all(
+    'a',
+    href=lambda x: x and (x.startswith('/2025/talks') or x.startswith('/talks/'))
+)
+```
