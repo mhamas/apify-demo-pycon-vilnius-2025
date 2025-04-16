@@ -29,7 +29,7 @@ async def main() -> None:
                 href=lambda x: x and (x.startswith('/2025/talks') or x.startswith('/talks/'))
             )
 
-            for link in talk_links:
+            for link in talk_links[:10]:
                 talk_title = link.text.strip()
                 speaker_name = None
 
@@ -40,12 +40,33 @@ async def main() -> None:
                         speaker_span = speaker_spans[-1]
                         speaker_name = speaker_span.text.strip()
 
-                Actor.log.info(f'Speaker: {speaker_name}, Talk: {talk_title}, Day: {day}')
+                linkedin_url = None
+                if speaker_name:
+                    call_result = await Actor.call('apify/google-search-scraper', {
+                        "forceExactMatch": False,
+                        "includeIcons": False,
+                        "includeUnfilteredResults": False,
+                        "maxPagesPerQuery": 1,
+                        "mobileResults": False,
+                        "queries": f'site:linkedin.com/in \"{speaker_name}\"',
+                        "resultsPerPage": 10,
+                        "saveHtml": False,
+                        "saveHtmlToKeyValueStore": False
+                    })
+                    if call_result:
+                        dataset = await Actor.open_dataset(id=call_result.default_dataset_id, force_cloud=True)
+                        async for page in dataset.iterate_items():
+                            for result in page['organicResults']:
+                                if 'linkedin.com/in' in result.get('url', ''):
+                                    linkedin_url = result.get('url')
+
+                    Actor.log.info(f'Speaker: {speaker_name}, Talk: {talk_title}, LinkedIn: {linkedin_url}, Day: {day}')
 
                 await Actor.charge('speaker')
                 await Actor.push_data({
                     'speaker_name': speaker_name,
                     'talk_title': talk_title,
+                    'linkedin_url': linkedin_url,
                     'day': day,
                 })
 
