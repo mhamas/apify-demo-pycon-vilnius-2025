@@ -22,5 +22,25 @@ async def main() -> None:
         async def request_handler(context: BeautifulSoupCrawlingContext) -> None:
             url = context.request.url
             Actor.log.info(f'Scraping {url}...')
+            soup = context.soup
+            talk_links = soup.find_all('a', href=lambda x: x and x.startswith('/2025/talks'))
+
+            for link in talk_links:
+                talk_title = link.text.strip()
+                speaker_name = None
+
+                parent_div = link.find_parent('div')
+                if parent_div:
+                    speaker_spans = parent_div.find_all('span')
+                    if speaker_spans:
+                        speaker_span = speaker_spans[-1]
+                        speaker_name = speaker_span.text.strip()
+
+                Actor.log.info(f'Speaker: {speaker_name}, Talk: {talk_title}')
+
+                await Actor.push_data({
+                    'speaker_name': speaker_name,
+                    'talk_title': talk_title,
+                })
 
         await crawler.run(start_urls)
