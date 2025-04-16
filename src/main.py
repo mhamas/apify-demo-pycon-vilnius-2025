@@ -29,7 +29,7 @@ async def main() -> None:
                 href=lambda x: x and (x.startswith('/2025/talks') or x.startswith('/talks/'))
             )
 
-            for link in talk_links[:10]:
+            for link in talk_links:
                 talk_title = link.text.strip()
                 speaker_name = None
 
