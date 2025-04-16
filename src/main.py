@@ -42,6 +42,7 @@ async def main() -> None:
 
                 Actor.log.info(f'Speaker: {speaker_name}, Talk: {talk_title}, Day: {day}')
 
+                await Actor.charge('speaker')
                 await Actor.push_data({
                     'speaker_name': speaker_name,
                     'talk_title': talk_title,

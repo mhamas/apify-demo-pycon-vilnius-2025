@@ -2,12 +2,12 @@
 
 This is a demo Actor used during the [workshop](https://pycon.lt/talks/LAG8AJ) in Vilnius in 2025. It showcases how to implement and monetize a simple Apify Actor using the Beautiful Soup and Crawlee template from Apify. The Actor scrapes the names of speakers at the conference, along with the titles of their talks. The intended use case is to quickly create a database of speakers for potentially connecting with them in the future.
 
-## Step 1 - create Apify Account
+## 1. create Apify Account
 Head to [Apify Console](https://console.apify.com/sign-up) and create an account, or login with Google / Github.
 
 ![Sign up](images/1_signup.png)
 
-## Step 2 - create a new Actor using template
+## 2. create a new Actor using template
 Head to [Actors > Development](https://console.apify.com/actors/development/my-actors) and cick `Develop new`.
 
 ![Develop new Actor](images/2a_develop_new.png)
@@ -20,7 +20,7 @@ Click on `View all templates`, find `Crawlee + BeautifulSoup` template, and inst
 
 ![Use template](images/2d_use_template.png)
 
-## Step 3 - inspecting the target website
+## 3. inspecting the target website
 Go to [pycon.lt](https://pycon.lt/) and inspect the pages dedicated for the 3 days of the conference ([Python day](https://pycon.lt/day/python), [Data day](https://pycon.lt/day/data), [AI day](https://pycon.lt/day/ai)).
 
 Let's take Python day for example. Open developer tools in your browser and inspect the HTML structure of the page.
@@ -29,7 +29,7 @@ Let's take Python day for example. Open developer tools in your browser and insp
 
 Bingo, it seems that all we need to do is to fetch all `<a href="...">` links where `href` is a string that starts with `/2025/talks`. Then, we can get the text in that href (talk title), and find the closest `<span>` afterwards, which contains the speaker name. Let's get to coding.
 
-## Step 4 - coding
+## 4. Coding
 ### 4.1 Modifying the input schema
 Let's head to `.actor/input_schema.json` and modify the `prefill` for the `start_urls` to `https://pycon.lt/day/python`. While on it, let's also change the `title` of the schema to something more reasonable.
 
@@ -150,3 +150,26 @@ talk_links = soup.find_all(
     href=lambda x: x and (x.startswith('/2025/talks') or x.startswith('/talks/'))
 )
 ```
+
+### 4.6 Add monetization
+Add `await Actor.charge('speaker')` just before you push to the dataset.
+
+Then, head to `Publication > Monetization` section to setup the monetization. You will need to first fill in your contact details for payouts. Feel free to put some mock data there for the sake of trying it out, you can always change it later.
+
+![Monetization - add billing details](images/4h_monetization_1.png)
+
+When you've added your details, click `Set up monetization` and chose `Pay per event` model. That's the pricing model that allows you to charge via `Actor.charge` directly from the code.
+
+![Choosing PPE](images/4h_monetization_2.png)
+
+Finally, you need to setup your events you can charge for using `Actor.charge`. Previously, we added `Actor.charge('speaker')` to the code, so let's add single `spaker` event with some nice title and description.
+
+![Setting up speaker event](images/4h_monetization_3.png)
+
+And that's it, now your code is monetized and after publishing, you would start earning money on every paying user that runs it.
+
+
+## 5. Publishing your Actor
+Publishing an Actor is a single button click `Publish to store` in the `Publication` tab. Having said that, since the Actor has monetization attached model, we won't publish it now, because public monetized Actor can be only taken down with 14 day notice, as some users might be dependent on it. So let's keep it simple and skip this step.
+
+![Publishing Actor](images/5_publish.png)
