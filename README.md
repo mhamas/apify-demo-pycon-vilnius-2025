@@ -173,3 +173,32 @@ And that's it, now your code is monetized and after publishing, you would start 
 Publishing an Actor is a single button click `Publish to store` in the `Publication` tab. Having said that, since the Actor has monetization attached model, we won't publish it now, because public monetized Actor can be only taken down with 14 day notice, as some users might be dependent on it. So let's keep it simple and skip this step.
 
 ![Publishing Actor](images/5_publish.png)
+
+## 6. Bonus: getting LinkedIn URLs
+In this bonus section, you will use existing [Google Search Scraper](https://apify.com/apify/google-search-scraper) to try to find the LinkedIn URL for each speaker.
+
+You can call this Actor from your code via `await Actor.call('apify/google-search-scraper')`. Play with the Actor in the Console to discover correct input
+parameters to use as the 2nd argument. Then, use the `default_dataset_id` from the call result to open dataset `await Actor.open_dataset` iterate results and extract the LinkedIn URL, if found. Store this URL to your output as well.
+
+**Solution**
+```python
+linkedin_url = None
+if speaker_name:
+    call_result = await Actor.call('apify/google-search-scraper', {
+        "forceExactMatch": False,
+        "includeIcons": False,
+        "includeUnfilteredResults": False,
+        "maxPagesPerQuery": 1,
+        "mobileResults": False,
+        "queries": f'site:linkedin.com/in \"{speaker_name}\"',
+        "resultsPerPage": 10,
+        "saveHtml": False,
+        "saveHtmlToKeyValueStore": False
+    })
+    if call_result:
+        dataset = await Actor.open_dataset(id=call_result.default_dataset_id, force_cloud=True)
+        async for page in dataset.iterate_items():
+            for result in page['organicResults']:
+                if not linkedin_url and 'linkedin.com/in' in result.get('url', ''):
+                    linkedin_url = result.get('url')
+```
