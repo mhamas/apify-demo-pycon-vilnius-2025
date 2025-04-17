@@ -1,6 +1,6 @@
 # Apify demo - PyCon Vilnius 2025
 
-This is a demo Actor used during the [workshop](https://pycon.lt/talks/LAG8AJ) in Vilnius in 2025. It showcases how to implement and monetize a simple Apify Actor using the BeautifulSoup and Crawlee template from Apify. The Actor scrapes the names of speakers at the conference, along with the titles of their talks. The intended use case is to quickly create a database of speakers to potentially connect with them in the future.
+This is a demo Actor used during the [workshop](https://pycon.lt/talks/LAG8AJ) in Vilnius in 2025. It showcases how to implement and monetize a simple Apify [Actor](https://apify.com/actors) using the BeautifulSoup and [Crawlee](https://crawlee.dev/python/docs/quick-start) template from Apify. The Actor scrapes the names of speakers at the conference, along with the titles of their talks. The intended use case is to quickly create a database of speakers to potentially connect with them in the future.
 
 ## 1. Create an Apify account
 Head to [Apify Console](https://console.apify.com/sign-up) and create an account, or login with Google or Github.
@@ -27,11 +27,11 @@ Let's take Python day for example. Open developer tools in your browser and insp
 
 ![Inspect Python day](images/3_inspect_page_python_day.png)
 
-Bingo, it seems that all we need to do is to fetch all `<a href="...">` links where "href" is a string that starts with "/2025/talks". Then, we can get the text in that href (talk title), and find the closest "`<span>`" afterwards, which contains the speaker name. Let's get to coding.
+Bingo, it seems that all we need to do is to fetch all `<a href="...">` links where `href` is a string that starts with "/2025/talks". Then, we can get the text in that href (talk title), and find the closest `<span>` afterwards, which contains the speaker name. Let's get to coding.
 
 ## 4. Coding
 ### 4.1 Modifying the input schema
-Let's head to `.actor/input_schema.json` and modify the `prefill` for the `start_urls` to "https://pycon.lt/day/python". While on it, let's also change the `title` of the schema to something more reasonable.
+Let's head to `.actor/input_schema.json` and modify the `prefill` for the `start_urls` to https://pycon.lt/day/python. While on it, let's also change the `title` of the schema to something more reasonable.
 
 ![Modifying input schema](images/4a_modifying_input_schema.png)
 
@@ -77,7 +77,7 @@ Now you are ready to try out your Actor!
 ### 4.4 Trying out the very simple version
 Before running the Actor, you need to build it to create an image that will later be executed at runtime. Once your Actor is built, start it. Check the "Input" tab to make sure you have correctly pre-populated the input with the Python day URL. This is prefilled from the `prefill` property you added in `input_schema.json`.
 
-Your current implementation is executing `request_handler` for each `start_url` (by default single one for the Python day). Then, it's simply printing the URL to the log. You might see the log duplicated, as one is appended with an extra system message.
+Your current implementation is executing `request_handler` for each `start_url` (by default single one for the Python day). Then, it's simply printing the URL to the log.
 
 ![Seeing first log](images/4d_seeing_first_log.png)
 
@@ -138,7 +138,7 @@ When you run the Actor, head to the "Output" tab. You might see that the speaker
 
 **Solution**
 
-For some reason, `<a href='...'>" elements on Data day page have "href" links that don't start with "/2025/talks", but only "/talks".
+For some reason, `<a href='...'>` elements on Data day page have `href` links that don't start with "/2025/talks", but only "/talks".
 
 ![Data day HTML](images/4g_data_day_data_inconsistency.png)
 
@@ -151,25 +151,24 @@ talk_links = soup.find_all(
 ```
 
 ### 4.6 Add monetization
-Add "await Actor.charge('speaker')" just before you push to the dataset.
+Add `await Actor.charge('speaker')` just before you push to the dataset.
 
 Then, head to the "Publication > Monetization" section to set up the monetization. You will need to first fill in your contact details for payouts. Feel free to put some mock data there for the sake of trying it out, you can always change it later.
 
 ![Monetization - add billing details](images/4h_monetization_1.png)
 
-When you've added your details, click "Set up monetization" and choose "Pay per event" model. That's the pricing model that allows you to charge via "Actor.charge" directly from the code.
+When you've added your details, click "Set up monetization" and choose "Pay per event" model. That's the pricing model that allows you to charge via `Actor.charge` directly from the code.
 
 ![Choosing PPE](images/4h_monetization_2.png)
 
-Finally, you need to set up your events you can charge for using "Actor.charge". Previously, we added "Actor.charge('speaker')" to the code, so let's add a single `speaker` event with some nice title and description.
+Finally, you need to set up your events so you can charge them using `Actor.charge`. Previously, we added `Actor.charge('speaker')` to the code, so let's add a single `speaker` event with some nice title and description.
 
 ![Setting up speaker event](images/4h_monetization_3.png)
 
 And that's it, now your code is monetized and after publishing, you will start earning money on every paying user that runs it.
 
-
 ## 5. Publishing your Actor
-Publishing an Actor is a single button click, "Publish to Store" in the "Publication" tab. Having said that, since the Actor has a monetization model attached, we won't publish it now, because a publicly monetized Actor can be only taken down with 14 14-day notice, as some users might be dependent on it. So let's keep it simple and skip this step.
+Publishing an Actor is a single button click, "Publish to Store" in the "Publication" tab. Having said that, since the Actor has a monetization model attached, we won't publish it now, because a publicly monetized Actor can be only taken down with a 14-day notice, as some users might be dependent on it. So let's keep it simple and skip this step.
 
 ![Publishing Actor](images/5_publish.png)
 
