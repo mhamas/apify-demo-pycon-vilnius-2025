@@ -178,6 +178,19 @@ In this bonus section, you will use the existing [Google Search Scraper](https:/
 You can call this Actor from your code via `await Actor.call('apify/google-search-scraper')`. Play with the Actor in the Console to discover the correct input
 parameters to use as the 2nd argument. Then, use the `default_dataset_id` from the call result to open a dataset `await Actor.open_dataset`, iterate results, and extract the LinkedIn URL, if found. Store this URL into your output as well.
 
+**Tip**
+
+Initialize the `BeautifulSoupCrawler` with a longer request timeout, otherwise the call to Google Search Scraper might start timing out.
+Also, to make sure the request is not retried in case of a failure and each speaker is returned only once, you can set `max_request_retries=0`.
+```python
+from datetime import timedelta
+
+crawler = BeautifulSoupCrawler(
+    max_request_retries=0,
+    request_handler_timeout=timedelta(minutes=10),
+)
+```
+
 **Solution**
 ```python
 linkedin_url = None

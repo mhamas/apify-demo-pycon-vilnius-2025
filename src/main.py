@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from apify import Actor
 from crawlee.crawlers import BeautifulSoupCrawler, BeautifulSoupCrawlingContext
-
+from datetime import timedelta
 
 async def main() -> None:
     async with Actor:
@@ -16,7 +16,10 @@ async def main() -> None:
             Actor.log.info('No start URLs specified in Actor input, exiting...')
             await Actor.exit()
 
-        crawler = BeautifulSoupCrawler()
+        crawler = BeautifulSoupCrawler(
+            max_request_retries=0,
+            request_handler_timeout=timedelta(minutes=10),
+        )
 
         @crawler.router.default_handler
         async def request_handler(context: BeautifulSoupCrawlingContext) -> None:
